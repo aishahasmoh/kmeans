@@ -52,3 +52,6 @@ mpirun -np 4 ./mpi_kmeans
 gcc -o kmeans kmeans.c
 ./kmeans
 ```
+
+## Coding Standards
+The code in this project follows the C style guidelines as outlined by 
