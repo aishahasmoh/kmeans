@@ -5,45 +5,26 @@
 #include <float.h> // for DBL_MAX
 #include <time.h>   // for time()
 #include <math.h>  // for pow()
-
-
-/************************ Struct Types **************************************/
-struct Point {
-    double income;
-    double score;
-    double min_dist;
-    int cluster_idx;
-};
-
-
-/************************ Global Variables **********************************/
-#define MAX_LINE_LEN 1024
-
+#include "kmeans.h"
 
 /****************************************************************************/
 /* Helper method                                                            */
 /* Get the Euclidean distance between the two 2D points p1 and p2           */
 /****************************************************************************/
 double distance(struct Point * p1, struct Point * p2) {
-    return pow((p2->income - p1->income),2) + pow((p2->score - p1->score),2);
+    return sqrt(pow((p2->income - p1->income),2) + pow((p2->score - p1->score),2));
 }
 
 void assign_points_to_clusters(struct Point * points, struct Point  * centroids, int n, int k) {
-	for (int c=0; c<k; c++) {
-        for (int p=0; p<n; p++) {
+    for (int p=0; p<n; p++) {
+        	for (int c=0; c<k; c++) {
             double dist = distance(&points[p], &centroids[c]);
-            if (dist < points[p].min_dist) {
+            if (dist < points[p].min_dist) { //update cluster if point is closer to centroid c
                 points[p].min_dist = dist;
                 points[p].cluster_idx = c;
-                printf("Updating the distance %f %d\n", dist, c);
-
             }
         }
     }
-    //for (int p=0; p<n; p++) {
-    //    printf("Income = %f Score = %f Cluster = %d, distance = %f\n ",
-    //            points[p].income, points[p].score, points[p].cluster_idx, points[p].min_dist);
-    //}
 }
 
 void compute_new_cluster_centroids(struct Point * points, struct Point * centroids, int n, int k) {
@@ -54,17 +35,13 @@ void compute_new_cluster_centroids(struct Point * points, struct Point * centroi
 
     //compute total incomes and total scores of all points in each cluster
     for (int p=0; p<n; p++) {
-        //printf("Income = %f Score = %f Cluster = %d, distance = %f\n ",
-        //        points[p].income, points[p].score, points[p].cluster_idx, points[p].min_dist);
         n_points[points[p].cluster_idx] += 1;
         income_sums[points[p].cluster_idx] += points[p].income;
         score_sums[points[p].cluster_idx] += points[p].score;
     }
     
-    // compute new center = total / num_points
+    // compute new center's income and score = total / num_points
 	for (int c=0; c<k; c++) {
-        //printf("Income Sum = %f Score Sum = %f Cluster = %d, N points = %d\n ",
-        //    income_sums[c], score_sums[c], c, n_points[c]);
         centroids[c].income = income_sums[c] / n_points[c];
         centroids[c].score = score_sums[c] / n_points[c];
     }
@@ -78,7 +55,7 @@ void compute_new_cluster_centroids(struct Point * points, struct Point * centroi
    point to its nearest cluster point.
 2. Repeat:
     - Compute the centroid of each cluster
-    - Assign each point to the nearest centroid and redefine the cluster    */
+    - Assign each point to the nearest centroid                             */
 /****************************************************************************/
 void k_means(struct Point * points, int n, int k, int epochs) {
 	assert(k <= n);
@@ -99,32 +76,15 @@ void k_means(struct Point * points, int n, int k, int epochs) {
     }
 
     for (int epoch=0; epoch<epochs; epoch++) {
-        //printf("Before assigning points to clusters **********************************\n");
-        //for (int p=0; p<n; p++) {
-        //    printf("epoch %d Income = %f Score = %f Cluster = %d, distance = %f\n ", epoch, 
-        //            points[p].income, points[p].score, points[p].cluster_idx, points[p].min_dist);
-        //}
         // Assign points to a cluster
         assign_points_to_clusters(points, centroids, n, k);
-        //printf("After assigning points to clusters **********************************\n");
-        //for (int p=0; p<n; p++) {
-        //    printf("epoch %d Income = %f Score = %f Cluster = %d, distance = %f\n ", epoch, 
-        //            points[p].income, points[p].score, points[p].cluster_idx, points[p].min_dist);
-        //}
-        //for (int j=0; j < k; j++) {
-        //    printf("Centroid Income = %f Score = %f\n ", centroids[j].income, centroids[j].score);
-        //}
+
         // Compute new centroids
         compute_new_cluster_centroids(points, centroids, n, k);
+    }
 
-        printf("After computing new clusters **********************************\n");
-        //for (int p=0; p<n; p++) {
-        //    printf("Income = %f Score = %f Cluster = %d, distance = %f\n ",
-        //            points[p].income, points[p].score, points[p].cluster_idx, points[p].min_dist);
-        //}
-        for (int j=0; j < k; j++) {
-            printf("epoch %d centroid %d Income = %f Score = %f\n ", epoch, j, centroids[j].income, centroids[j].score);
-        }
+    for (int j=0; j < k; j++) {
+        printf("Final Centroid %d Income = %f Score = %f\n ", j, centroids[j].income, centroids[j].score);
     }
 }
 
@@ -174,6 +134,40 @@ void read_csv(char * csv_file, struct Point * points) {
     }
 }
 
+void test_distance_calculation() {
+    struct Point p1 = {0, 0, 0, -1};
+    struct Point p2 = {3, 4, 0, -1};
+    double dist = distance(&p1, &p2);
+    assert(dist == 5.0); // Distance between (0,0) and (3,4) should be sqrt(5^2) = s5
+}
+
+void test_assign_points_to_clusters() {
+    struct Point centroids[] = {{1, 1, -1, -1}, {4, 4, -1, -1}, {7, 7, -1, -1}};
+    assert(centroids[0].income == 1 && centroids[0].score == 1);
+    assert(centroids[1].income == 4 && centroids[1].score == 4);
+    assert(centroids[2].income == 7 && centroids[2].score == 7);
+    struct Point assigned_points[] = {{2, 2, DBL_MAX, -1}, {5, 5, DBL_MAX, -1}, {8, 8, DBL_MAX, -1}};
+    assign_points_to_clusters(assigned_points, centroids, 3, 3);
+    assert(assigned_points[0].cluster_idx ==  0);
+    assert(assigned_points[1].cluster_idx ==  1);
+    assert(assigned_points[2].cluster_idx ==  2);
+}
+
+void test_compute_new_cluster_centroids() {
+    struct Point centroids[] = {{1, 1, -1, -1}, {4, 4, -1, -1}, {7, 7, -1, -1}};
+    assert(centroids[0].income == 1 && centroids[0].score == 1);
+    assert(centroids[1].income == 4 && centroids[1].score == 4);
+    assert(centroids[2].income == 7 && centroids[2].score == 7);
+    struct Point assigned_points[] = {{2, 2, DBL_MAX, 0}, {5, 5, DBL_MAX, 1}, {8, 8, DBL_MAX, 2}};
+    assign_points_to_clusters(assigned_points, centroids, 3, 3);
+    assert(assigned_points[0].cluster_idx ==  0);
+    assert(assigned_points[1].cluster_idx ==  1);
+    assert(assigned_points[2].cluster_idx ==  2);
+    assert(centroids[0].income == 2 && centroids[0].score == 2);
+    assert(centroids[1].income == 5 && centroids[1].score == 5);
+    assert(centroids[2].income == 8 && centroids[2].score == 8);
+}
+
 
 /****************************************************************************/
 /* The program reads the "data/Mall_Customers.csv" file and performs Kmeans */
@@ -185,13 +179,14 @@ int main( int argc, char **argv ) {
 	struct Point points[n];
     
     read_csv("data/Mall_Customers.csv", points);
-    for (int j=0; j < n; j++) {
-        //printf("Income = %f Score = %f\n ", points[j].income, points[j].score);
-
-    }
 
     k_means(points, n, k, n_epochs);
 
+    printf("Running unit tests...\n");
+    test_distance_calculation();
+    test_assign_points_to_clusters();
+    // Call other unit tests
+    printf("All unit tests passed!\n");
     return 0;
 }
 
