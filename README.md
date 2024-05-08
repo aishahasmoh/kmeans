@@ -20,6 +20,12 @@ I implemented clustering of the mall dataset from
 https://github.com/robertmartin8/udemyML/blob/master/06_clustering/Mall_Customers.csv
 To create a 2D dataset. I used 2 features: spending score and annual income.
 
+## Coding Standards
+The code in this project follows the C style guidelines as outlined [here](https://www.cs.umd.edu/~nelson/classes/resources/cstyleguide/)
+
+The code was tested using unit tests to test each components of the code including
+distance calculation, updating points to clusters assignemnt, and updating centroid functions. 
+
 ## Setup
 install `mpi` on your machine. For macOS, install the package from this url
 https://www.open-mpi.org/software/ompi/v2.0/ and
@@ -53,5 +59,3 @@ gcc -o kmeans kmeans.c
 ./kmeans
 ```
 
-## Coding Standards
-The code in this project follows the C style guidelines as outlined [here](https://www.cs.umd.edu/~nelson/classes/resources/cstyleguide/)

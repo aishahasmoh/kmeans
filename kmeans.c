@@ -71,8 +71,9 @@ void k_means(struct Point * points, int n, int k, int epochs) {
     	centroids[i].income = points[centroids_idx[i]].income;
     	centroids[i].score = points[centroids_idx[i]].score;
     }
+    printf("Initial Centroids");
     for (int j=0; j < k; j++) {
-        printf("Initial Centroid %d Income = %f Score = %f\n ", j, centroids[j].income, centroids[j].score);
+        printf("Centroid %d Income = %f Score = %f\n ", j, centroids[j].income, centroids[j].score);
     }
 
     for (int epoch=0; epoch<epochs; epoch++) {
@@ -83,8 +84,9 @@ void k_means(struct Point * points, int n, int k, int epochs) {
         compute_new_cluster_centroids(points, centroids, n, k);
     }
 
+    printf("Final Centroids");
     for (int j=0; j < k; j++) {
-        printf("Final Centroid %d Income = %f Score = %f\n ", j, centroids[j].income, centroids[j].score);
+        printf("Centroid %d Income = %f Score = %f\n ", j, centroids[j].income, centroids[j].score);
     }
 }
 
@@ -134,6 +136,7 @@ void read_csv(char * csv_file, struct Point * points) {
     }
 }
 
+/************************* Unit Tests ***************************************/
 void test_distance_calculation() {
     struct Point p1 = {0, 0, 0, -1};
     struct Point p2 = {3, 4, 0, -1};
@@ -167,6 +170,7 @@ void test_compute_new_cluster_centroids() {
     assert(centroids[1].income == 5 && centroids[1].score == 5);
     assert(centroids[2].income == 8 && centroids[2].score == 8);
 }
+/****************************************************************************/
 
 
 /****************************************************************************/
