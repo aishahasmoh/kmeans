@@ -54,4 +54,4 @@ gcc -o kmeans kmeans.c
 ```
 
 ## Coding Standards
-The code in this project follows the C style guidelines as outlined by 
+The code in this project follows the C style guidelines as outlined [here](https://www.cs.umd.edu/~nelson/classes/resources/cstyleguide/)
