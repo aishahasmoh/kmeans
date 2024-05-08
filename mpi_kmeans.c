@@ -36,7 +36,7 @@ void read_mall_customers_csv(struct Point * points) {
         points[i].income = p.income;
         points[i].score = p.score;
         i++;
-        //printf("Income = %d Score = %d\n ", p.income, p.score);
+        printf("Income = %d Score = %d\n ", p.income, p.score);
         free(tmp);
     }
 }

@@ -1,3 +1,6 @@
 mpi_kmeans
 kmeans
 data/Mall_customers.csv
+.vscode/
+kmeans.dSYM
+mpi_kmeans.dSYM
