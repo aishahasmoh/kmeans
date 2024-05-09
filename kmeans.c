@@ -9,7 +9,7 @@
 
 
 /******************************************************************************/
-/* Helper metshod:  retrn Euclidean distance between two 2D points p1 and p2   */  
+/* Helper metshod:  retrn Euclidean distance between two 2D points p1 and p2  */  
 /******************************************************************************/
 double distance(struct Point * p1, struct Point * p2) {
     return sqrt(pow(p2->income - p1->income, 2) + pow(p2->score - p1->score, 2));
@@ -19,7 +19,7 @@ double distance(struct Point * p1, struct Point * p2) {
 /* Assign each data point to the cluster who's centeroid is closest to point  */
 /******************************************************************************/
 void assign_points_to_clusters(
-        struct Point * points, struct Point  * centroids, int n, int k) {
+        struct Point * points, int n, struct Point * centroids, int k) {
         for (int p=0; p<n; p++) {
         	for (int c=0; c<k; c++) {
             double dist = distance(&points[p], &centroids[c]);
@@ -35,7 +35,7 @@ void assign_points_to_clusters(
 /* Compute new centroids for each cluster using the points assigned to it.    */
 /******************************************************************************/
 void compute_new_cluster_centroids(
-        struct Point * points, struct Point * centroids, int n, int k) {
+        struct Point * points, int n, struct Point * centroids, int k) {
 
     double income_sums[k];      // sum income for points in each centroid
     double score_sums[k];       // sum score for points in each centroid
@@ -73,7 +73,8 @@ void compute_new_cluster_centroids(
     - Compute the centroid of each cluster
     - Assign each point to the nearest centroid                               */
 /******************************************************************************/
-void k_means(struct Point * points, int n, struct Point * centroids, int k, int epochs) {
+void k_means(
+    struct Point * points, int n, struct Point * centroids, int k, int epochs) {
 	assert(k <= n);
 
 	// Pick k points at random to be the initial centroids
@@ -93,8 +94,8 @@ void k_means(struct Point * points, int n, struct Point * centroids, int k, int 
     }
 
     for (int epoch=0; epoch<epochs; epoch++) {
-        assign_points_to_clusters(points, centroids, n, k);
-        compute_new_cluster_centroids(points, centroids, n, k);
+        assign_points_to_clusters(points, n, centroids, k);
+        compute_new_cluster_centroids(points, n, centroids, k);
     }
 
     printf("Final Centroids\ns");
@@ -255,7 +256,7 @@ void test_assign_points_to_clusters() {
     assert(centroids[2].income == 7 && centroids[2].score == 7);
     struct Point assigned_points[] = {
         {2, 2, DBL_MAX, -1}, {5, 5, DBL_MAX, -1}, {8, 8, DBL_MAX, -1}};
-    assign_points_to_clusters(assigned_points, centroids, 3, 3);
+    assign_points_to_clusters(assigned_points, 3, centroids, 3);
     assert(assigned_points[0].cluster_idx ==  0);
     assert(assigned_points[1].cluster_idx ==  1);
     assert(assigned_points[2].cluster_idx ==  2);
@@ -268,7 +269,7 @@ void test_compute_new_cluster_centroids() {
     assert(centroids[2].income == 7 && centroids[2].score == 7);
     struct Point assigned_points[] = {
         {2, 2, DBL_MAX, 0}, {5, 5, DBL_MAX, 1}, {8, 8, DBL_MAX, 2}};
-    assign_points_to_clusters(assigned_points, centroids, 3, 3);
+    assign_points_to_clusters(assigned_points, 3, centroids, 3);
     assert(assigned_points[0].cluster_idx ==  0);
     assert(assigned_points[1].cluster_idx ==  1);
     assert(assigned_points[2].cluster_idx ==  2);

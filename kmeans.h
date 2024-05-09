@@ -23,10 +23,10 @@ struct Point {
 double distance(struct Point * p1, struct Point * p2);
 
 void assign_points_to_clusters(
-    struct Point * points, struct Point  * centroids, int n, int k);
+    struct Point * points, int n, struct Point * centroids, int k);
 
 void compute_new_cluster_centroids(
-    struct Point * points, struct Point * centroids, int n, int k);
+    struct Point * points, int n, struct Point * centroids, int k);
 
 void k_means(
     struct Point * points, int n, struct Point * centroids, int k, int epochs);
