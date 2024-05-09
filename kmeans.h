@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <float.h> // for DBL_MAX
+#include <float.h>  // for DBL_MAX
 #include <time.h>   // for time()
-#include <math.h>  // for pow()
+#include <math.h>   // for pow()
 
 
 /************************ Struct Types **************************************/
