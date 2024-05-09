@@ -57,6 +57,16 @@ successful, run the following command:
 mpirun --version
 ```
 
+Create a python venv and activate it and install packages in requirements.txt
+```sh
+brew install python-tk
+cd .venv/bin/
+source activate 
+cd ../../
+pip3 install -r requirements.txt
+```
+
+
 ## Usage
 To compile
 ```sh

@@ -32,4 +32,6 @@ void k_means(struct Point * points, int n, int k, int epochs);
 
 static struct Point get_spending_score_and_annual_income(char* line);
 
-void read_csv(char * csv_file, struct Point * points);
+void read_csv(struct Point * points, int n, const char * csv_file);
+
+void save_csv(struct Point * points, int n, const char * csv_file);

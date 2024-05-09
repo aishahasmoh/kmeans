@@ -9,8 +9,7 @@
 
 
 /******************************************************************************/
-/* Helper method                                                              */
-/* Get the Euclidean distance between the two 2D points p1 and p2             */
+/* Helper method:  retrn Euclidean distance between two 2D points p1 and p2   */  
 /******************************************************************************/
 double distance(struct Point * p1, struct Point * p2) {
     return sqrt(pow((p2->income - p1->income), 2)
@@ -33,6 +32,9 @@ void assign_points_to_clusters(
     }
 }
 
+/******************************************************************************/
+/* Compute new centroids for each cluster using the points assigned to it.    */
+/******************************************************************************/
 void compute_new_cluster_centroids(
         struct Point * points, struct Point * centroids, int n, int k) {
 
@@ -45,6 +47,7 @@ void compute_new_cluster_centroids(
         n_points[points[p].cluster_idx] += 1;
         income_sums[points[p].cluster_idx] += points[p].income;
         score_sums[points[p].cluster_idx] += points[p].score;
+        points[p].min_dist = DBL_MAX;  // reset distance
     }
     
     // compute new center's income and score = total / num_points
@@ -57,7 +60,7 @@ void compute_new_cluster_centroids(
 }
 
 /******************************************************************************/
-/* Kmeans:                                                                    
+/* Kmeans clustering algorithm:                                                                    
 1. Initialise the clusters: randomly choose k points and assign each data
    point to its nearest cluster point.
 2. Repeat:
@@ -98,7 +101,7 @@ void k_means(struct Point * points, int n, int k, int epochs) {
 
 
 /******************************************************************************/
-/* Helper method                                                              */
+/* Helper method: parse one line and return the income and score.             */
 /******************************************************************************/
 static struct Point get_spending_score_and_annual_income(char* line) {
     const char* tok;
@@ -118,7 +121,7 @@ static struct Point get_spending_score_and_annual_income(char* line) {
 /******************************************************************************/
 /* Read the csv dataset file                                                  */
 /******************************************************************************/
-void read_csv(char * csv_file, struct Point * points) {    
+void read_csv(struct Point * points, int n, const char * csv_file) {    
     FILE* stream;
     char line[MAX_LINE_LEN];
     char* tmp;
@@ -140,6 +143,29 @@ void read_csv(char * csv_file, struct Point * points) {
         line_idx++;
         free(tmp);
     }
+}
+
+void save_csv(struct Point * points, int n, const char * csv_file) {
+    FILE *fp = fopen(csv_file, "w"); // Open file for writing
+    if (fp == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    fprintf(fp, "income, score, cluster\n");
+
+    // Write array elements to the file, separated by commas
+    for (int i = 0; i < n; i++) {
+        if (i != (n-1)) {
+            fprintf(fp, "%f, %f, %d\n",
+                points[i].income, points[i].score, points[i].cluster_idx);
+        } else {
+        fprintf(fp, "%f, %f, %d",
+            points[i].income, points[i].score, points[i].cluster_idx);
+        }
+    }
+
+    fclose(fp); // Close the file
 }
 
 /************************* Unit Tests *****************************************/
@@ -182,17 +208,19 @@ void test_compute_new_cluster_centroids() {
 
 
 /******************************************************************************/
-/* The program reads the "data/Mall_Customers.csv" file and performs Kmeans   */
+/* The program reads the "data/mall_data.csv" file and performs Kmeans   */
 /* Clustering on it. It assumes number of clusters (k) = 5.                   */
 /* Mall Customers dataset contains 200 data points                            */
 /******************************************************************************/
 int main( int argc, char **argv ) {
-    int k = 5, n = 200, n_epochs=200;
+    int k = 5, n = 200, n_epochs=1000;
 	struct Point points[n];
     
-    read_csv("data/Mall_Customers.csv", points);
+    read_csv(points, n, "data/mall_data.csv");
 
     k_means(points, n, k, n_epochs);
+
+    save_csv(points, n, "data/kmeans_results.csv");
 
     printf("Running unit tests...\n");
     test_distance_calculation();
