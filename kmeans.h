@@ -7,7 +7,7 @@
 #include <math.h>   // for pow()
 
 
-/************************ Struct Types **************************************/
+/************************** Struct Types **************************************/
 struct Point {
     double income;
     double score;
@@ -16,15 +16,17 @@ struct Point {
 };
 
 
-/************************ Global Variables **********************************/
+/************************** Global Variables **********************************/
 #define MAX_LINE_LEN 1024
 
 
 double distance(struct Point * p1, struct Point * p2);
 
-void assign_points_to_clusters(struct Point * points, struct Point  * centroids, int n, int k);
+void assign_points_to_clusters(
+    struct Point * points, struct Point  * centroids, int n, int k);
 
-void compute_new_cluster_centroids(struct Point * points, struct Point * centroids, int n, int k);
+void compute_new_cluster_centroids(
+    struct Point * points, struct Point * centroids, int n, int k);
 
 void k_means(struct Point * points, int n, int k, int epochs);
 
