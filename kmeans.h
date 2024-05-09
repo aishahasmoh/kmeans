@@ -28,10 +28,12 @@ void assign_points_to_clusters(
 void compute_new_cluster_centroids(
     struct Point * points, struct Point * centroids, int n, int k);
 
-void k_means(struct Point * points, int n, int k, int epochs);
+void k_means(
+    struct Point * points, int n, struct Point * centroids, int k, int epochs);
 
 static struct Point get_spending_score_and_annual_income(char* line);
 
 void read_csv(struct Point * points, int n, const char * csv_file);
 
-void save_csv(struct Point * points, int n, const char * csv_file);
+void save_csv(struct Point * points, int n, struct Point * centroids, int k,
+        const char * csv_file);

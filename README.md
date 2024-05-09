@@ -1,8 +1,4 @@
-
-
-# Kmeans Implementation
-
-## About 
+## About the project
 
 ### Kmeans
 k-means clustering is an agorithm that finds a partitioning of points in a
@@ -49,7 +45,7 @@ append the following line to the ~/.bash_profile file
 ```sh
 export PATH="$PATH:$HOME/opt/usr/local/bin/"
 ```
-then run `source `
+then run `source ~/.bash_profile`
 
 MPI should be installed and ready for use. To check that imstallation was
 successful, run the following command:

@@ -9,19 +9,18 @@
 
 
 /******************************************************************************/
-/* Helper method:  retrn Euclidean distance between two 2D points p1 and p2   */  
+/* Helper metshod:  retrn Euclidean distance between two 2D points p1 and p2   */  
 /******************************************************************************/
 double distance(struct Point * p1, struct Point * p2) {
-    return sqrt(pow((p2->income - p1->income), 2)
-        + pow((p2->score - p1->score), 2));
+    return sqrt(pow(p2->income - p1->income, 2) + pow(p2->score - p1->score, 2));
 }
 
 /******************************************************************************/
-/* Assign each data point to the cluster who's centeroid is closes to point   */
+/* Assign each data point to the cluster who's centeroid is closest to point  */
 /******************************************************************************/
 void assign_points_to_clusters(
         struct Point * points, struct Point  * centroids, int n, int k) {
-    for (int p=0; p<n; p++) {
+        for (int p=0; p<n; p++) {
         	for (int c=0; c<k; c++) {
             double dist = distance(&points[p], &centroids[c]);
             if (dist < points[p].min_dist) { // point is closer to centroid c
@@ -41,6 +40,13 @@ void compute_new_cluster_centroids(
     double income_sums[k];      // sum income for points in each centroid
     double score_sums[k];       // sum score for points in each centroid
     int n_points[k];            // number ofs points in each centroid
+
+    // compute new center's income and score = total / num_points
+	for (int c=0; c<k; c++) {
+        income_sums[c] = 0;
+        score_sums[c] = 0;
+        n_points[c] = 0;
+    }
 
     //compute total incomes and total scores of all points in each cluster
     for (int p=0; p<n; p++) {
@@ -67,7 +73,7 @@ void compute_new_cluster_centroids(
     - Compute the centroid of each cluster
     - Assign each point to the nearest centroid                               */
 /******************************************************************************/
-void k_means(struct Point * points, int n, int k, int epochs) {
+void k_means(struct Point * points, int n, struct Point * centroids, int k, int epochs) {
 	assert(k <= n);
 
 	// Pick k points at random to be the initial centroids
@@ -76,15 +82,14 @@ void k_means(struct Point * points, int n, int k, int epochs) {
     for (int i=0; i < k; i++) {
     	centroids_idx[i] = rand() % n;
     }
-    struct Point centroids[k];
     for (int i=0; i < k; i++) {
     	centroids[i].income = points[centroids_idx[i]].income;
     	centroids[i].score = points[centroids_idx[i]].score;
     }
-    printf("Initial Centroids");
+    printf("Initial Centroids\n");
     for (int j=0; j < k; j++) {
         printf("Centroid %d Income = %f Score = %f\n ",
-            j, centroids[j].income, centroids[j].score);
+            centroids_idx[j], centroids[j].income, centroids[j].score);
     }
 
     for (int epoch=0; epoch<epochs; epoch++) {
@@ -92,7 +97,7 @@ void k_means(struct Point * points, int n, int k, int epochs) {
         compute_new_cluster_centroids(points, centroids, n, k);
     }
 
-    printf("Final Centroids");
+    printf("Final Centroids\ns");
     for (int j=0; j < k; j++) {
         printf("Centroid %d Income = %f Score = %f\n ",
             j, centroids[j].income, centroids[j].score);
@@ -145,7 +150,11 @@ void read_csv(struct Point * points, int n, const char * csv_file) {
     }
 }
 
-void save_csv(struct Point * points, int n, const char * csv_file) {
+/******************************************************************************/
+/* Save the results of clustering to a csv file                               */
+/******************************************************************************/
+void save_csv(
+    struct Point * points, int n, struct Point * centroids, int k, const char * csv_file) {
     FILE *fp = fopen(csv_file, "w"); // Open file for writing
     if (fp == NULL) {
         printf("Error opening file.\n");
@@ -153,6 +162,12 @@ void save_csv(struct Point * points, int n, const char * csv_file) {
     }
 
     fprintf(fp, "income, score, cluster\n");
+
+    // Write centroids array elements to the file, separated by commas
+    for (int i = 0; i < k; i++) {
+            fprintf(fp, "%f, %f, %d\n",
+                centroids[i].income, centroids[i].score, i);
+    }
 
     // Write array elements to the file, separated by commas
     for (int i = 0; i < n; i++) {
@@ -168,12 +183,69 @@ void save_csv(struct Point * points, int n, const char * csv_file) {
     fclose(fp); // Close the file
 }
 
-/************************* Unit Tests *****************************************/
+/******************************************************************************/
+/*                                 Unit Tests                                 */
+/******************************************************************************/
 void test_distance_calculation() {
-    struct Point p1 = {0, 0, 0, -1};
-    struct Point p2 = {3, 4, 0, -1};
-    double dist = distance(&p1, &p2);
-    assert(dist == 5.0); // Distance between (0,0) and (3,4) = sqrt(5^2) = 5
+    struct Point p1 = {4.00, -8.00, 0, 1};
+    struct Point p2 = {-7.00, 3.00, 0, 2};
+    double expected_dist = 15.556349;
+    double actual_dist = distance(&p1, &p2);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
+
+    struct Point p3 = {5.00, 3.00, 0, 3};
+    struct Point p4 = {2.00, -9.00, 0, 4};
+    expected_dist = 12.369317;
+    actual_dist = distance(&p3, &p4);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
+
+    struct Point p5 = {-3.00, 9.00, 0, 5};
+    struct Point p6 = {7.00, 0.00, 0, 6};
+    expected_dist = 13.453624;
+    actual_dist = distance(&p5, &p6);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
+
+    struct Point p7 = {1.00, 1.00, 0, 7};
+    struct Point p8 = {-4.00, 3.00, 0, 8};
+    expected_dist = 5.3851648;
+    actual_dist = distance(&p7, &p8);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
+
+    struct Point p9 = {8.00, 0.00, 0, 9};
+    struct Point p10 = {0.00, 10.00, 0, 10};
+    expected_dist = 12.806248;
+    actual_dist = distance(&p9, &p10);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
+
+    struct Point p11 = {-8.00, -7.00, 0, 11};
+    struct Point p12 = {-2.00, -2.00, 0, 12};
+    expected_dist = 7.8102497;
+    actual_dist = distance(&p11, &p12);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
+
+    struct Point p13 = {-5.00, 4.00, 0, 13};
+    struct Point p14 = {6.00, -7.00, 0, 14};
+    expected_dist = 15.556349;
+    actual_dist = distance(&p13, &p14);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
+
+    struct Point p15 = {2.00, -4.00, 0, 15};
+    struct Point p16 = {7.00, 9.00, 0, 16};
+    expected_dist = 13.928388;
+    actual_dist = distance(&p15, &p16);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
+
+    struct Point p17 = {-10.00, -2.00, 0, 17};
+    struct Point p18 = {9.00, 3.00, 0, 18};
+    expected_dist = 19.646883;
+    actual_dist = distance(&p17, &p18);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
+
+    struct Point p19 = {-5.00, 10.00, 0, 19};
+    struct Point p20 = {3.00, 6.00, 0, 20};
+    expected_dist = 8.9442719;
+    actual_dist = distance(&p19, &p20);
+    assert(fabs(actual_dist - expected_dist) < 0.001);
 }
 
 void test_assign_points_to_clusters() {
@@ -204,7 +276,6 @@ void test_compute_new_cluster_centroids() {
     assert(centroids[1].income == 5 && centroids[1].score == 5);
     assert(centroids[2].income == 8 && centroids[2].score == 8);
 }
-/******************************************************************************/
 
 
 /******************************************************************************/
@@ -213,14 +284,16 @@ void test_compute_new_cluster_centroids() {
 /* Mall Customers dataset contains 200 data points                            */
 /******************************************************************************/
 int main( int argc, char **argv ) {
-    int k = 5, n = 200, n_epochs=1000;
+    int k = 5, n = 200, n_epochs=5000;
 	struct Point points[n];
+    struct Point centroids[k];
+
     
     read_csv(points, n, "data/mall_data.csv");
 
-    k_means(points, n, k, n_epochs);
+    k_means(points, n, centroids, k, n_epochs);
 
-    save_csv(points, n, "data/kmeans_results.csv");
+    save_csv(points, n, centroids, k, "data/kmeans_results.csv");
 
     printf("Running unit tests...\n");
     test_distance_calculation();
